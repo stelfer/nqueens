@@ -92,17 +92,18 @@ class Board:
                  for i in range(self.size)]
         self.M = K
 
-    def count_isomorphisms_in(self, s):
+    def get_isomorphisms_in(self, s):
         """This happens by queen list, for efficiency
         
         s is a set
         """
-        r = 0
+        r = []
         for c in self.cycle:
             c()
-            if self.to_queen_list() in s:
-                r += 1
-        return r
+            ql = self.to_queen_list()
+            if ql in s:
+                r.append(ql)
+        return tuple(r)
         
     def count_isomorphisms_to(self, board):
         r = 0
@@ -111,7 +112,12 @@ class Board:
             if board.M == self.M:
                 r += 1
         return r
-        
+
+    def add_isomorphisms_to(self, s):
+        for c in self.cycle:
+            c()
+            s.add(self.to_queen_list())
+    
     def display(self):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)

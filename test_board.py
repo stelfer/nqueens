@@ -163,7 +163,16 @@ class TestBoardBase(unittest.TestCase):
         s.add(b1)
 
         self.assertTrue(ql in s)
-        self.assertEqual(b0.count_isomorphisms_in(s), 1)
+        self.assertEqual(b0.get_isomorphisms_in(s), (ql,))
+
+    def test_add_isos_to(self):
+        b = Board(4)
+        b.place_queen(1,0)
+
+        s = set()
+        b.add_isomorphisms_to(s)
+        self.assertEqual(s, set([((1, 0),), ((0, 1),), ((3, 2),), ((0, 2),), ((1, 3),), ((3, 1),), ((2, 0),), ((2, 3),)]))
+        
         
         
 if __name__ == '__main__':

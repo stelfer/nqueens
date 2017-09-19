@@ -40,10 +40,11 @@ class NQueens(Backtrack):
             for j in range(self.board_size):
                 if b.M[i][j] == 0:
                     b.place_queen(i,j)
-                    if b.count_isomorphisms_in(self.bad) == 0:
-                        c.append((i,j))
-                    else:
+                    ql = b.to_queen_list()
+                    if ql in self.bad:
                         self.bad_isos += 1
+                    else:
+                        c.append((i,j))
                     b.unplace_queen(i,j)
         
         if len(c) + len(a) < n:
@@ -62,8 +63,9 @@ class NQueens(Backtrack):
             
             v = self.backtrack(n,a)
             if v == 0:
-                # print "BAD", Board.from_queen_list(a, self.board_size).M
-                self.bad.add(tuple(sorted(tuple(a))))
+                # print "BAD", tuple(sorted(tuple(a)))
+                Board.from_queen_list(a, self.board_size).add_isomorphisms_to(self.bad)
+
             b += v
             self.unmake_move(a,c)
         return b
