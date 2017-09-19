@@ -65,8 +65,88 @@ class TestBoardBase(unittest.TestCase):
         self.assertEqual(b.M, [[2, 2, 4, 2], [4, 4, 1, 2], [1, 4, 4, 4], [4, 2, 2, 0]])
         b.unplace_queen(2,0)
         self.assertEqual(b.M, Board.from_queen_list([(1,2)],4).M)
-        
 
+    def test_reflect_horiz(self):
+        b = Board(4)
+        b.place_queen(0,0)
+        M1 = b.M
+        self.assertEqual(M1, [[1, 2, 2, 2], [2, 2, 0, 0], [2, 0, 2, 0], [2, 0, 0, 2]])
+        b.reflect_horiz()
+        M2 = b.M
+        self.assertEqual(M2, [[2, 2, 2, 1], [0, 0, 2, 2], [0, 2, 0, 2], [2, 0, 0, 2]])
+        b.reflect_horiz()
+        self.assertEqual(b.M, M1)
+
+    def test_reflect_diag_symmetric(self):
+        b = Board(4)
+        b.place_queen(0,0)
+        M1 = b.M
+        self.assertEqual(M1, [[1, 2, 2, 2], [2, 2, 0, 0], [2, 0, 2, 0], [2, 0, 0, 2]])
+        b.reflect_diag()
+        self.assertEqual(b.M, M1)
+
+    def test_reflect_diag_asymmetric(self):
+        b = Board(4)
+        b.place_queen(1,0)
+        M1 = b.M
+        self.assertEqual(M1, [[2, 2, 0, 0], [1, 2, 2, 2], [2, 2, 0, 0], [2, 0, 2, 0]])
+        b.reflect_diag()
+        self.assertEqual(b.M, [[2, 1, 2, 2], [2, 2, 2, 0], [0, 2, 0, 2], [0, 2, 0, 0]])
+        b.reflect_diag()
+        self.assertEqual(b.M, M1)
+
+    def test_cycle_manual(self):
+        b = Board(4)
+        b.place_queen(1,0)
+        M1 = b.M
+        b.reflect_diag()
+        b.reflect_horiz()
+        b.reflect_diag()
+        b.reflect_horiz()
+        b.reflect_diag()
+        b.reflect_horiz()
+        b.reflect_diag()
+        b.reflect_horiz()
+        self.assertEqual(b.M, M1)
+
+    def test_cycle(self):
+        b = Board(4)
+        b.place_queen(1,0)
+        M1 = b.M
+        [ c() for c in b.cycle ]
+        self.assertEqual(b.M, M1)
+
+    def test_self_iso(self):
+        b = Board(4)
+        b.place_queen(1,0)
+        b2 = Board(4)
+        b2.place_queen(1,0)
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_diag()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_horiz()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_diag()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_horiz()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_diag()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_horiz()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_diag()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+        b2.reflect_horiz()
+        self.assertEqual(b.count_isomorphisms_to(b2), 1)
+
+    def test_no_iso(self):
+        b1 = Board(4)
+        b1.place_queen(1,0)
+        b2 = Board(4)
+        b2.place_queen(3,3)
+        self.assertEqual(b1.count_isomorphisms_to(b2), 0)
+        self.assertEqual(b2.count_isomorphisms_to(b1), 0)        
+        
 if __name__ == '__main__':
     unittest.main()
 

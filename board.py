@@ -3,12 +3,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Board:
-    """ A generic board class that can evaluate symmetries
+    """A generic board class that can evaluate symmetries
 
     We evaulate the symmetries of the system.  The 2D square is a
-    representation of Dih4. Using the the generators b = horizontal reflection
-    and c = ccw rotation + vertical rotation the Cayley graph has a hamiltonian
-    path with the application of the generators in this sequence
+    representation of Dih4. Using the the generators 
+    
+    b = horizontal reflection
+    c = ccw rotation + vertical rotation / diagonal reflection
+
+    the Cayley graph has a hamiltonian path with the application of the 
+    generators in this sequence
     
     e c b c b c b c b -> e
 
@@ -16,10 +20,18 @@ class Board:
     easily.
 
     """
+
     def __init__(self, size):
         self.size = size
         self.M = [ [ 0 for i in range(self.size)] for j in range(self.size)]
-        
+        self.cycle = (self.reflect_diag,
+                      self.reflect_horiz,
+                      self.reflect_diag,
+                      self.reflect_horiz,
+                      self.reflect_diag,
+                      self.reflect_horiz,
+                      self.reflect_diag,
+                      self.reflect_horiz)
 
     @staticmethod
     def from_queen_list(ql, N):
@@ -68,36 +80,27 @@ class Board:
                     pl.append((i,j))
         return pl
 
-    def gen_b(self, board):
-        return [ [ board[j][i]
+    def reflect_horiz(self):
+        K = [ [ self.M[j][i]
                    for i in range(self.size-1,-1,-1)]
                  for j in range(self.size)]
+        self.M = K
     
-    def gen_c(self, board):
-        return [ [ board[j][i]
+    def reflect_diag(self):
+        K = [ [ self.M[j][i]
                    for j in range(self.size)]
                  for i in range(self.size)]
-    
-    
-    def gen_cycle(self, board):
-        #c b c b c b c b -> e
-        ops = [self.gen_c,
-               self.gen_b,
-               self.gen_c,
-               self.gen_b,
-               self.gen_c,
-               self.gen_b,
-               self.gen_c,
-               self.gen_b]
-        cycles = []
-        x = board
-        for o in ops:
-            x = o(x)
-            cycles.append(x)
-        assert board == cycles[-1]
-        return cycles
+        self.M = K
 
-
+        
+    def count_isomorphisms_to(self, board):
+        r = 0
+        for c in self.cycle:
+            c()
+            if board.M == self.M:
+                r += 1
+        return r
+        
     def display(self):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
