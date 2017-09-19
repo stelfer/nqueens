@@ -81,17 +81,32 @@ class Board:
         return tuple(pl)
 
     def reflect_horiz(self):
-        K = [ [ self.M[j][i]
-                   for i in range(self.size-1,-1,-1)]
-                 for j in range(self.size)]
-        self.M = K
-    
-    def reflect_diag(self):
-        K = [ [ self.M[j][i]
-                   for j in range(self.size)]
-                 for i in range(self.size)]
+        K = [ [ self.M[j][i] for i in range(self.size-1,-1,-1)] for j in range(self.size)]
         self.M = K
 
+
+    def get_reflect_horiz_map(self):
+        K = [ [ ((i,j),(j,i)) for i in range(self.size-1,-1,-1)] for j in range(self.size)]
+        print K
+        D = {}
+        for i,c in enumerate(K):
+            for j,(k,v) in enumerate(c):
+                D[k] = v
+        return D                
+        
+    def reflect_diag(self):
+        K = [ [ self.M[j][i] for j in range(self.size)] for i in range(self.size)]
+        self.M = K
+
+    def get_reflect_diag_map(self):
+        K = [ [ ((i,j),(i,j)) for j in range(self.size)] for i in range(self.size)]
+        print K
+        D = {}
+        for i,c in enumerate(K):
+            for j,(k,v) in enumerate(c):
+                D[k] = v
+        return D                
+        
     def get_isomorphisms_in(self, s):
         """This happens by queen list, for efficiency
         
@@ -121,14 +136,17 @@ class Board:
     def display(self):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        img = ax.imshow(self.M, vmin=0, vmax=10)
+        cmap = plt.cm.jet
+
+        mmax = max([ max(x) for x in self.M ])
+        img = ax.imshow(self.M, vmin=0, vmax=mmax, interpolation='nearest')
         cbar = fig.colorbar(img)
+
         #ax.set_axis_off()
         ax.set_xticks(np.arange(-.5, self.size, 1), minor=True);
         ax.set_yticks(np.arange(-.5, self.size, 1), minor=True);
         ax.set_yticklabels([], minor=True)
         ax.grid(which='minor', color='w', linestyle='-', linewidth=2)
-        plt.legend()
         plt.show()
     
 

@@ -1,7 +1,7 @@
 import unittest
 import copy
 from board import Board
-
+import pprint
 
 class TestBoardBase(unittest.TestCase):
 
@@ -173,6 +173,18 @@ class TestBoardBase(unittest.TestCase):
         b.add_isomorphisms_to(s)
         self.assertEqual(s, set([((1, 0),), ((0, 1),), ((3, 2),), ((0, 2),), ((1, 3),), ((3, 1),), ((2, 0),), ((2, 3),)]))
         
+        
+    def test_gen_reflect_horiz_map(self):
+        b1 = Board(4)
+        
+        D1 = b1.get_reflect_horiz_map()
+        D2 = b1.get_reflect_horiz_map()
+
+        b1.place_queen(1,0)
+        b1.display()
+        
+        pprint.pprint(D1)
+        pprint.pprint(D2)
         
         
 if __name__ == '__main__':
