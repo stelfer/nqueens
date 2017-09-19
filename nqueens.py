@@ -4,41 +4,16 @@ import math
 #%matplotlib inline
 import pprint
 import sys
-
+import copy
 
 from board import Board
-
-class Backtrack:
-    def make_move(self, a, c):
-        a.append(c)
-    
-    def unmake_move(self, a, c):
-        a.pop()
-    
-    def backtrack(self, n, a = []):
-        if (self.is_a_solution(a,n)):
-            self.process_solution(a)
-        else:
-            for c in self.construct_candidates(a,n):
-                self.make_move(a, c)
-                self.backtrack(n,a)
-                self.unmake_move(a,c)
-                
-
-
+from backtrack import Backtrack
                 
 class NQueens(Backtrack):
     """Solves NQueens
-    
-    We evaulate the symmetries of the system.  The 2D square is a
-    representation of Dih4. Using the the generators b = horizontal reflection
-    and c = ccw rotation + vertical rotation the Cayley graph has a hamiltonian
-    path with the application of the generators in this sequence
-    
-    e c b c b c b c b -> e
 
-    This means that we can generate all possible 2D square symmetries very
-    easily.
+    We prune by testing each candidate against all isomorphisms under Dih4 for
+    each known bad position.
 
     """
     
@@ -48,6 +23,7 @@ class NQueens(Backtrack):
         self.results = set()
         self.p = 0
         self.bad = set()
+        self.bad_isos = 0
 
     def is_a_solution(self, a,n):
         return len(a) == n
@@ -57,62 +33,24 @@ class NQueens(Backtrack):
         self.results.add(a)
 
     def construct_candidates(self, a, n):
-        board = self.position_list_to_board(a)
-
-        self.print_board(board)
-        sys.exit(0)
-        
-        op = []
+        b = Board.from_queen_list(a, self.board_size)
+        c = []
+        # Search the board for open positions
         for i in range(self.board_size):
             for j in range(self.board_size):
-                if board[i][j] == NQueens.OPEN:
-                    op.append((i,j))       
+                if b.M[i][j] == 0:
+                    b.place_queen(i,j)
+                    if b.count_isomorphisms_in(self.bad) == 0:
+                        c.append((i,j))
+                    else:
+                        self.bad_isos += 1
+                    b.unplace_queen(i,j)
         
-        
-        if len(op) + len(a) < n:
+        if len(c) + len(a) < n:
             # Then there's no point, we don't have enough candidates to get to n
             return []        
-        return op
+        return c
 
-
-    
-    def print_board(self, board):
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        img = ax.imshow(board, vmin=0, vmax=2)
-        #ax.set_axis_off()
-        ax.set_xticks(np.arange(-.5, self.board_size, 1), minor=True);
-        ax.set_yticks(np.arange(-.5, self.board_size, 1), minor=True);
-        ax.set_yticklabels([], minor=True)
-        ax.grid(which='minor', color='w', linestyle='-', linewidth=2)
-        plt.show()
-    
-    def print_results(self):
-        
-        nresults = len(self.results)
-        
-        print "N=", nresults
-        
-        pprint.pprint(self.bad)
-        
-        ncol = 1 if nresults > 1 else nresults
-        nrow = nresults/ncol + nresults % ncol
-        
-        print ncol, nrow,
-        
-        
-        fig = plt.figure()
-        
-        plt.axis('off')
-        for i,r in enumerate(self.results):
-            board = self.position_list_to_board(r)
-            ax = fig.add_subplot(nrow, ncol, i+1)
-            img = ax.imshow(board)
-            ax.set_axis_off()
-        
-        plt.show()
-        
-        
     def backtrack(self, n, a = []):
         if (self.is_a_solution(a,n)):
             self.process_solution(a)
@@ -124,24 +62,30 @@ class NQueens(Backtrack):
             
             v = self.backtrack(n,a)
             if v == 0:
+                # print "BAD", Board.from_queen_list(a, self.board_size).M
                 self.bad.add(tuple(sorted(tuple(a))))
             b += v
             self.unmake_move(a,c)
         return b
+
     
-NQ = NQueens(4)
-
-
-# e = NQ.create_board()
-# NQ.place_queen(1,2,e)
-# NQ.place_queen(0,0,e)
-# NQ.print_board(e)
-
-# pprint.pprint(e)
-
-# print NQ.board_to_position_list(e)
-
-NQ.backtrack(4)
-
-NQ.print_results()
-plt.show()
+    def print_results(self):
+        nresults = len(self.results)
+        print "N=", nresults
+        print "Bad_isos = ", self.bad_isos
+        if nresults == 0:
+            return
+        pprint.pprint(self.bad)
+        
+        ncol = 1 if nresults > 1 else nresults
+        nrow = nresults/ncol + nresults % ncol
+        print ncol, nrow,
+        fig = plt.figure()
+        plt.axis('off')
+        for i,r in enumerate(self.results):
+            board = Board.from_queen_list(r, self.board_size)
+            ax = fig.add_subplot(nrow, ncol, i+1)
+            img = ax.imshow(board.M)
+            ax.set_axis_off()
+        plt.show()
+        

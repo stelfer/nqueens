@@ -92,7 +92,6 @@ class Board:
                  for i in range(self.size)]
         self.M = K
 
-
     def count_isomorphisms_in(self, s):
         """This happens by queen list, for efficiency
         
