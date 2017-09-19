@@ -72,13 +72,13 @@ class Board:
         assert(self.M[i][j] == 0)
         self.M[i][j] = 1
         
-    def to_position_list(self):
+    def to_queen_list(self):
         pl = []
         for i,c in enumerate(self.M):
             for j,r in enumerate(c):
                 if r == 1:
                     pl.append((i,j))
-        return pl
+        return tuple(pl)
 
     def reflect_horiz(self):
         K = [ [ self.M[j][i]
@@ -92,6 +92,18 @@ class Board:
                  for i in range(self.size)]
         self.M = K
 
+
+    def count_isomorphisms_in(self, s):
+        """This happens by queen list, for efficiency
+        
+        s is a set
+        """
+        r = 0
+        for c in self.cycle:
+            c()
+            if self.to_queen_list() in s:
+                r += 1
+        return r
         
     def count_isomorphisms_to(self, board):
         r = 0
@@ -104,7 +116,7 @@ class Board:
     def display(self):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        img = ax.imshow(self.M)
+        img = ax.imshow(self.M, vmin=0, vmax=10)
         cbar = fig.colorbar(img)
         #ax.set_axis_off()
         ax.set_xticks(np.arange(-.5, self.size, 1), minor=True);

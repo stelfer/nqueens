@@ -1,5 +1,5 @@
 import unittest
-
+import copy
 from board import Board
 
 
@@ -54,9 +54,11 @@ class TestBoardBase(unittest.TestCase):
         self.assertEqual(b.M, [[2, 2, 4, 2], [4, 4, 1, 2], [1, 4, 4, 4], [4, 2, 2, 0]])
 
     def test_from_queen_list(self):
-        ql = [(1,2), (2,0)]
+        ql = ((1,2), (2,0))
         b = Board.from_queen_list(ql, 4)
         self.assertEqual(b.M, [[2, 2, 4, 2], [4, 4, 1, 2], [1, 4, 4, 4], [4, 2, 2, 0]])
+        self.assertEqual(ql, b.to_queen_list())
+        
         
     def test_open_position(self):
         b = Board(4)
@@ -146,6 +148,23 @@ class TestBoardBase(unittest.TestCase):
         b2.place_queen(3,3)
         self.assertEqual(b1.count_isomorphisms_to(b2), 0)
         self.assertEqual(b2.count_isomorphisms_to(b1), 0)        
+
+
+    def test_iso_in(self):
+        b0 = Board(4)
+        b0.place_queen(1,0)
+        
+        ql = b0.to_queen_list()
+        s = set()
+        s.add(ql)
+
+        b1 = Board(4)
+        b1.place_queen(3,0) # 3,0 not isomoporphic to (1,0)
+        s.add(b1)
+
+        self.assertTrue(ql in s)
+        self.assertEqual(b0.count_isomorphisms_in(s), 1)
+        
         
 if __name__ == '__main__':
     unittest.main()
